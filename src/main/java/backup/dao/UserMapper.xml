@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="backup.dao.UserMapper">  
+  	<cache type="org.mybatis.caches.ehcache.LoggingEhcache" />
+  
+    <resultMap type="backup.bean.User" id="UserResultMap">  
+        <result property="username" column="username" javaType="String" jdbcType="VARCHAR"/>  
+        <result property="password" column="password"  javaType="String" jdbcType="VARCHAR"/>  
+        <result property="locked" column="islocked" javaType="Boolean" jdbcType="TINYINT"/>  
+        <result property="createTime" column="create_time" javaType="java.sql.Timestamp" jdbcType="TIMESTAMP"/>  
+    </resultMap>  
+      
+    <!-- 依据username查询user -->  
+    <select id="getUser" parameterType="String" resultMap="UserResultMap">  
+        <![CDATA[ 
+            SELECT * from sys_users
+                WHERE username = #{username}  
+        ]]>
+    </select>  
+      
+    <!-- 更新user-->
+    <update id="updatePwd" parameterType="User">
+    	UPDATE sys_users set password = #{password},
+    	createtime = #{createTime}
+    	where username = #{username}
+    </update>  
+     <!-- get all user -->
+    <select id="getAllUsers" resultMap="UserResultMap">
+     	SELECT * from sys_users
+     </select>
+     
+     <!-- lock user -->
+     <update id="lockUser" parameterType="String">
+     	UPDATE sys_users set islocked = true where username = #{username} 
+     </update>
+     
+     <!-- unlock user -->
+     <update id="unlockUser" parameterType="String">
+     	UPDATE sys_users set islocked = false where username = #{username} 
+     </update>
+     
+</mapper>  

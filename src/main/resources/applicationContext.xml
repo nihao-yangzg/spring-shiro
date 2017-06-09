@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd 
+                        http://www.springframework.org/schema/mvc 
+                        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd 
+                        http://www.springframework.org/schema/context 
+                        http://www.springframework.org/schema/context/spring-context-4.0.xsd 
+                        http://www.springframework.org/schema/aop 
+                        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd 
+                        http://www.springframework.org/schema/tx 
+                        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+	<mvc:annotation-driven/>
+	<context:annotation-config/>
+	<context:component-scan base-package="backup.controller, backup.service"></context:component-scan>
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">    
+	  <property name="messageConverters">    
+	      <list>    
+	          <ref bean="mappingJackson2HttpMessageConverter" />    
+	      </list>    
+	  </property>    
+	</bean>
+	<!-- reponse json convert -->
+	<bean id="mappingJackson2HttpMessageConverter"    
+	  class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">    
+	  <property name="supportedMediaTypes">    
+	      <list>    
+	          <value>text/html;charset=UTF-8</value>    
+	          <value>text/json;charset=UTF-8</value>    
+	          <value>application/json;charset=UTF-8</value>    
+	      </list>    
+	  </property>    
+	</bean> 
+	<!-- 加载数据库配置参数 -->      
+    <context:property-placeholder location="classpath:database.properties"/>  
+    <!--创建jdbc数据源 -->  
+    <bean id="dataSource" class="org.apache.ibatis.datasource.pooled.PooledDataSource">
+        <property name="driver" value="${jdbc.driver.classname}" />  
+        <property name="url" value="${jdbc.url}" />  
+        <property name="username" value="${jdbc.username}" />  
+        <property name="password" value="${jdbc.password}" />
+        <property name="poolMaximumActiveConnections" value="20"/>
+        <property name="poolMaximumIdleConnections" value="5"/>
+    </bean> 
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	  <property name="dataSource" ref="dataSource" />
+	  <property name="configLocation" value="classpath:mybatis-spring.xml"/>
+	</bean>
+	<!-- 自动注册backup.dao包内的mapper bean -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">  
+	    <property name="basePackage" value="backup.dao"/>  
+	</bean>
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	<!--  <bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="backup.dao.UserMapper"/>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	-->
+
+</beans>
